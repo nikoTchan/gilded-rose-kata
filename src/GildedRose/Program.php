@@ -2,6 +2,7 @@
 
 namespace GildedRose;
 
+use GildedRose\Objects\Dexterity;
 use GildedRose\Objects\ItemInterface;
 
 /**
@@ -52,29 +53,10 @@ class Program
     private $items = array();
 
 
-    public static function Main()
+    public function Main()
     {
-        echo "HELLO\n";
-
-        $app = new Program(array(
-              new Item(array( 'name' => ItemInterface::DEXTERITY,'sellIn' => 10,'quality' => 20)),
-              new Item(array( 'name' => ItemInterface::AGED_BRIE,'sellIn' => 2,'quality' => 0)),
-              new Item(array( 'name' => ItemInterface::ELIXIR,'sellIn' => 5,'quality' => 7)),
-              new Item(array( 'name' => ItemInterface::SULFURAS,'sellIn' => 0,'quality' => 80)),
-              new Item(array(
-                     'name' => ItemInterface::BACKSTAGE,
-                     'sellIn' => 15,
-                     'quality' => 20
-              )),
-              new Item(array('name' => ItemInterface::CAKE,'sellIn' => 3,'quality' => 6)),
-        ));
-
-        $app->UpdateQuality();
-
-        echo sprintf("%50s - %7s - %7s\n", "Name", "SellIn", "Quality");
-        foreach ($app->items as $item) {
-            echo sprintf("%50s - %7d - %7d\n", $item->name, $item->sellIn, $item->quality);
-        }
+        $this->UpdateQuality();
+        $this->printResults();
     }
 
     public function __construct(array $items)
@@ -105,6 +87,13 @@ class Program
             if ($this->isSulfuras($i)) {
                 continue;
             }
+            $item = $this->items[$i];
+            if ($item instanceof Dexterity) {
+                /** @var Dexterity $item */
+                $item->updateQuality();
+                continue;
+            }
+
             if (!$this->isAgedBrie($i) && !$this->isBackstage($i)) {
                 $this->decreaseQualityWhenNotHasMinimumQuality($i);
             } else {
@@ -253,6 +242,16 @@ class Program
     {
         if ($this->hasQuality($i)) {
             $this->decreaseQuality($i);
+        }
+    }
+
+    protected function printResults()
+    {
+        echo "HELLO\n";
+
+        echo sprintf("%50s - %7s - %7s\n", "Name", "SellIn", "Quality");
+        foreach ($this->items as $item) {
+            echo sprintf("%50s - %7d - %7d\n", $item->name, $item->sellIn, $item->quality);
         }
     }
 }
